@@ -14,6 +14,11 @@ android {
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
+    lintOptions {
+        disable 'IconMissingDensityFolder'
+        abortOnError true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,23 +27,6 @@ android {
         debug {
             // Run code coverage reports by default on debug builds.
             testCoverageEnabled = true
-        }
-    }
-
-    // If you need to add more flavors, consider using flavor dimensions.
-    productFlavors {
-        mock {
-            applicationIdSuffix = ".mock"
-        }
-        prod {
-        }
-    }
-
-    // Remove mockRelease as it's not needed.
-    android.variantFilter { variant ->
-        if(variant.buildType.name.equals('release')
-                && variant.getFlavors().get(0).name.equals('mock')) {
-            variant.setIgnore(true);
         }
     }
 
@@ -51,6 +39,12 @@ android {
 
 }
 
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -58,4 +52,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }

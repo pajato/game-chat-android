@@ -49,7 +49,7 @@ public enum Panel {
     private Fragment fragment;
 
     /** The fragment class. */
-    private Class<Fragment> fragmentClass;
+    private Class<? extends Fragment> fragmentClass;
 
     /** The panel layout id. */
     private int layoutId;
@@ -61,7 +61,7 @@ public enum Panel {
      * @param layoutId The given layout id.
      * @param fragmentClass The given layout class.
      */
-    Panel(final int titleId, final int layoutId, final Class fragmentClass) {
+    Panel(final int titleId, final int layoutId, final Class<? extends Fragment> fragmentClass) {
         this.titleId = titleId;
         this.layoutId = layoutId;
         this.fragmentClass = fragmentClass;

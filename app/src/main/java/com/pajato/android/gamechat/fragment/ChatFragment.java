@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import com.pajato.android.gamechat.R;
 
 
-public class ChatFragment extends Fragment{
+public class ChatFragment extends Fragment {
 
     public ChatFragment() {
         // Required empty public constructor
