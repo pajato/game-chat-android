@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Game Chat</string>
+    <string name="chat">Chat Panel</string>
+    <string name="game">Game</string>
+    <string name="home">Home</string>
+    <string name="members">Members</string>
+    <string name="rooms">Rooms</string>
+    <string name="nav_item_attachment">Attachment</string>
+    <string name="nav_item_images">Images</string>
+    <string name="nav_item_location">My Location</string>
+    <string name="nav_sub_menu">Sub Menu</string>
+    <string name="nav_sub_menu_item01">Sub Menu Item 1</string>
+    <string name="nav_sub_menu_item02">Sub Menu Item 2</string>
+    <string name="drawer_header_text">Drawer Header</string>
+    <string name="tbd">(tbd)</string>
+</resources>
