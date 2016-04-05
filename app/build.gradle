@@ -12,16 +12,22 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+
+        manifestPlaceholders = [gitScheme:"$rootProject.ext.gitScheme",
+                                gitApiKey:"$rootProject.ext.gitApiKey",
+                                gitServerClientId:"$rootProject.ext.gitServerClientId",
+                                gitServerWidgetUrl:"$rootProject.ext.gitServerWidgetUrl"]
     }
 
     lintOptions {
-        disable 'IconMissingDensityFolder'
+        disable 'IconMissingDensityFolder', 'GoogleAppIndexingWarning', 'GradleDependency'
         abortOnError true
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -46,11 +52,10 @@ gradle.projectsEvaluated {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:cardview-v7:23.1.1'
-    compile 'com.android.support:recyclerview-v7:23.1.1'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
-    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
+    compile "com.android.support:cardview-v7:${rootProject.ext.supportLibraryVersion}"
+    compile "com.android.support:recyclerview-v7:${rootProject.ext.supportLibraryVersion}"
+    compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibraryVersion}"
+    compile "com.android.support:design:${rootProject.ext.supportLibraryVersion}"
+    compile "com.google.android.gms:play-services-appindexing:${appIndexingVersion}"
+    compile(name:'identitytoolkit-api10', ext:'aar')
 }
