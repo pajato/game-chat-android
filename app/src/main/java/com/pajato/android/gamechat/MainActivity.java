@@ -1,6 +1,7 @@
 package com.pajato.android.gamechat;
 
-import android.net.Uri;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -18,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,33 +31,101 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import com.google.identitytoolkit.GitkitClient;
+import com.google.identitytoolkit.GitkitUser;
+import com.google.identitytoolkit.IdToken;
+
+import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.chat.ChatManagerImpl;
+import com.pajato.android.gamechat.game.GameManager;
+import com.pajato.android.gamechat.game.GameManagerImpl;
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.account.AccountManagerImpl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
 /**
  * The main activity ... <tbd>
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GitkitClient.SignInCallbacks {
+
+    // Public class constants
+
+    // Private class constants
+
+    /** The logcat tag constant. */
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+    // Private instance variables
+
+    /** The account manager handles all things related to accounts: signing in, switching accounts, setup, aliases, etc. */
+    private AccountManager mAccountManager;
+
+    /** The chat manager handles all things chat: accessing rooms, history, settings, etc. */
+    private ChatManager mChatManager;
+
+    /** The game manager handles all game related activities: mode, players, game selection, etc. */
+
+    private GameManager mGameManager;
+
+    /** The top level container. */
+    private DrawerLayout mDrawerLayout;
+
+    // Public instance methods
 
     /**
-     * The top level container.
+     * Override to implement a successful login by ensuring that the account is registered and up to date..
      */
-    private DrawerLayout mDrawerLayout;
+    @Override public void onSignIn(IdToken idToken, GitkitUser user) {
+        // Create a session for the given user by saving the token in the account.
+        Log.d(TAG, String.format("Processing a successful signin: idToken/user {%s/%s}.", idToken, user));
+        Toast.makeText(this, "You are successfully signed in to GameChat", Toast.LENGTH_LONG).show();
+        mAccountManager.handleSigninSuccess(idToken, user);
+    }
+
+    /** Override to implement a failed signin by posting a message to the User. */
+    @Override public void onSignInFailed() {
+        // Post a message and head back to the main screen.
+        Log.d(TAG, "Processing a failed signin attempt.");
+        Toast.makeText(this, "Sign in failed", Toast.LENGTH_LONG).show();
+        mAccountManager.handleSigninFailed();
+     }
+
+    // Protected instance methods
+
     /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     * Handle the signin activity result value by passing it back to the account manager.
+     *
+     * @param requestCode ...
+     * @param resultCode ...
+     * @param intent ...
      */
-    private GoogleApiClient client;
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        // Pass the event off to the account manager for processing.
+        Log.d(TAG, String.format("Processing a signin result: requestCode/resultCode/intent {%d/%d/%s}.", requestCode, resultCode, intent));
+        if (!mAccountManager.handleSigninResult(requestCode, resultCode, intent)) {
+            Log.d(TAG, "Signin result was not processed by the GIT.");
+            super.onActivityResult(requestCode, resultCode, intent);
+        }
+
+    }
 
     /**
      * Set up the app per the characteristics of the running device.
      *
-     * @param savedInstanceState The saved state on re-creation.  nil on initial creation.
+     * @see android.app.Activity#onCreate(Bundle)
      */
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        // Setup the top level views: toolbar, action bar and drawer layout.
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        // Initialize the app state as necessary.
         super.onCreate(savedInstanceState);
+        mAccountManager = new AccountManagerImpl(savedInstanceState);
+        mGameManager = new GameManagerImpl(savedInstanceState);
+        mChatManager = new ChatManagerImpl(savedInstanceState);
+
+        // Start the app.  Setup the top level views: toolbar, action bar and drawer layout.
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -74,66 +144,29 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
         tabLayout.setupWithViewPager(viewPager);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        switch (id) {
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
+        // Determine if an account needs to be set up.
+        if (!mAccountManager.hasAccount()) {
+            // There is no account yet.  Give the User a chance to sign in even though it is not strictly necessary, for
+            // example when playing games with the computer.
+            mAccountManager.signin(this);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.pajato.android.gamechat/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
+    /**
+     * Override to implement by passing a given intent to the account manager to see if it is consuming the intent.
+     *
+     * @param intent The given Intent object.
+     */
+    @Override protected void onNewIntent(final Intent intent) {
+        // Give the account manager a chance to consume the intent.
+        if (!mAccountManager.handleIntent(intent)) {
+            Log.d(TAG, "Signin intent was not processed by the GIT.");
+            super.onNewIntent(intent);
+        }
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.pajato.android.gamechat/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
-    }
+    // Private instance methods
 
     // Private classes
 

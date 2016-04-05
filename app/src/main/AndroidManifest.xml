@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2016 Pajato TechnologieInc.
+
+This file is part of Pajato GameChat.
+
+GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+details.
+
+You should have received a copy of the GNU General Public License along with GameChat.  If not, see
+http://www.gnu.org/licenses
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pajato.android.gamechat" >
+          package="com.pajato.android.gamechat" >
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application
         android:allowBackup="true"
@@ -14,28 +30,42 @@
         android:supportsRtl="true" >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- ATTENTION: This intent was auto-generated. Follow instructions at
-                 https://g.co/AppIndexing/AndroidStudio to publish your Android app deep links. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- ATTENTION: This data URL was auto-generated.
-                     We recommend that you use the HTTP scheme.
-                     TODO: Change the host or pathPrefix as necessary. -->
                 <data
-                    android:host="www.pajato.com"
-                    android:pathPrefix="/gamechat"
-                    android:scheme="http" />
+                    android:host="gitkit"
+                    android:scheme="${gitScheme}" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="identitytoolkit.show_providers"
+            android:value="Google" />
+        <meta-data
+            android:name="identitytoolkit.use_google_plus"
+            android:value="false" />
+        <meta-data
+            android:name="identitytoolkit.api_key"
+            android:value="${gitApiKey}" />
+        <meta-data
+            android:name="identitytoolkit.server_client_id"
+            android:value="${gitServerClientId}" />
+        <meta-data
+            android:name="identitytoolkit.server_widget_url"
+            android:value="${gitServerWidgetUrl}" />
     </application>
 
 </manifest>

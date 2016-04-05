@@ -13,8 +13,4 @@
     <string name="nav_sub_menu_item02">Sub Menu Item 2</string>
     <string name="drawer_header_text">Drawer Header</string>
     <string name="tbd">(tbd)</string>
-    <string name="firstTimeTitle">Welcome to GameChat!</string>
-    <string name="firstTimeText">Choose an account starting with one of the following social networks.</string>
-    <string name="request_account_permission">Permission is not available. Requesting account access permission.</string>
-    <string name="request_account_rationale_format">Allowing account access will let you select or add a %s account.</string>
 </resources>
