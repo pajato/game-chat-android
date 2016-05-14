@@ -59,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements GitkitClient.Sign
     /** The logcat tag constant. */
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    /** The preferences file name. */
+    private static final String PREFS = "GameChatPrefs";
+
     // Private instance variables
 
     /** The account manager handles all things related to accounts: signing in, switching accounts, setup, aliases, etc. */
@@ -83,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements GitkitClient.Sign
         // Create a session for the given user by saving the token in the account.
         Log.d(TAG, String.format("Processing a successful signin: idToken/user {%s/%s}.", idToken, user));
         Toast.makeText(this, "You are successfully signed in to GameChat", Toast.LENGTH_LONG).show();
-        mAccountManager.handleSigninSuccess(idToken, user);
+        mAccountManager.handleSigninSuccess(user.getUserProfile(), idToken, getSharedPreferences(PREFS, 0));
     }
 
     /** Override to implement a failed signin by posting a message to the User. */
@@ -110,7 +113,6 @@ public class MainActivity extends AppCompatActivity implements GitkitClient.Sign
             Log.d(TAG, "Signin result was not processed by the GIT.");
             super.onActivityResult(requestCode, resultCode, intent);
         }
-
     }
 
     /**
@@ -121,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements GitkitClient.Sign
     @Override protected void onCreate(Bundle savedInstanceState) {
         // Initialize the app state as necessary.
         super.onCreate(savedInstanceState);
-        mAccountManager = new AccountManagerImpl(savedInstanceState);
+        mAccountManager = new AccountManagerImpl(savedInstanceState, getSharedPreferences(PREFS, 0));
         mGameManager = new GameManagerImpl(savedInstanceState);
         mChatManager = new ChatManagerImpl(savedInstanceState);
 

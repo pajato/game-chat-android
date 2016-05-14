@@ -20,6 +20,8 @@ http://www.gnu.org/licenses
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -47,13 +49,15 @@ http://www.gnu.org/licenses
                     android:scheme="${gitScheme}" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.facebook.FacebookActivity" />
 
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="identitytoolkit.show_providers"
-            android:value="Google" />
+            android:value="Google, Facebook, Microsoft" />
         <meta-data
             android:name="identitytoolkit.use_google_plus"
             android:value="false" />
@@ -66,6 +70,9 @@ http://www.gnu.org/licenses
         <meta-data
             android:name="identitytoolkit.server_widget_url"
             android:value="${gitServerWidgetUrl}" />
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/fb_app_id" />
     </application>
 
 </manifest>

@@ -10,9 +10,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
-
         manifestPlaceholders = [gitScheme:"$rootProject.ext.gitScheme",
                                 gitApiKey:"$rootProject.ext.gitApiKey",
                                 gitServerClientId:"$rootProject.ext.gitServerClientId",
@@ -57,5 +55,22 @@ dependencies {
     compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibraryVersion}"
     compile "com.android.support:design:${rootProject.ext.supportLibraryVersion}"
     compile "com.google.android.gms:play-services-appindexing:${appIndexingVersion}"
+    compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.8.1'
     compile(name:'identitytoolkit-api10', ext:'aar')
+    compile(name:'identitytoolkit_fbv4', ext:'jar')
+
+    // Dependencies for on device tests.
+    androidTestCompile "junit:junit:$rootProject.ext.junitVersion"
+    androidTestCompile "com.android.support.test:runner:$rootProject.ext.runnerVersion"
+    androidTestCompile "com.android.support.test:rules:$rootProject.ext.runnerVersion"
+    androidTestCompile "com.android.support.test.espresso:espresso-idling-resource:$rootProject.ext.espressoVersion"
+    androidTestCompile "com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
+    androidTestCompile "com.android.support.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion"
+    androidTestCompile "com.android.support.test.espresso:espresso-intents:$rootProject.ext.espressoVersion"
+    androidTestCompile "com.android.support.test.uiautomator:uiautomator-v18:$rootProject.ext.uiautomatorVersion"
+}
+
+task printProps << {
+    println System.properties
 }
