@@ -17,12 +17,13 @@ package com.pajato.android.gamechat.account;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
-import com.google.identitytoolkit.GitkitUser;
+import com.google.identitytoolkit.GitkitUser.UserProfile;
 import com.google.identitytoolkit.IdToken;
 
 /**
- * Provides the interfaces that must be implemented by an account manager implementation.
+ * Provides the interfaces that must be supported by an account manager implementation.
  *
  * @author Paul Michael Reilly
  */
@@ -56,10 +57,11 @@ public interface AccountManager {
     /**
      * Handle a successful signing result.
      *
+     * @param profile The GIT user object.
      * @param idToken The GIT token provided by Google to authorize subsequent actions.
-     * @param user The GIT user object.
+     * @param preferences The shared preferences store where the GIT account data is persisted.G
      */
-    void handleSigninSuccess(final IdToken idToken, final GitkitUser user);
+    void handleSigninSuccess(final UserProfile profile, final IdToken idToken, final SharedPreferences preferences);
 
     /** @returns TRUE iff the application has a persisted account on the device. */
     boolean hasAccount();

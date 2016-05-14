@@ -17,13 +17,19 @@ package com.pajato.android.gamechat.account;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.identitytoolkit.GitkitClient;
 import com.google.identitytoolkit.GitkitUser;
+import com.google.identitytoolkit.GitkitUser.UserProfile;
 import com.google.identitytoolkit.IdToken;
+import com.google.identitytoolkit.IdProvider;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Manages the account related aspects of the GameChat application.  These include setting up the first time sign-in,
@@ -37,8 +43,10 @@ public class AccountManagerImpl implements AccountManager {
 
     // Local storage keys.
     private static final String KEY_ACCOUNT_NAME = "keyAccountName";
-    private static final String KEY_ACCOUNT_NICKNAME = "keyAccountNickname";
+    private static final String KEY_ACCOUNT_DISPLAY_NAME = "keyAccountDisplayName";
     private static final String KEY_ACCOUNT_TYPE = "keyAccountType";
+    private static final String KEY_ACCOUNT_URL = "keyAccountUrl";
+    private static final String KEY_ACCOUNT_TOKEN = "keyAccountToken";
 
     /** The logcat tag constant. */
     private static final String TAG = AccountManagerImpl.class.getSimpleName();
@@ -53,19 +61,10 @@ public class AccountManagerImpl implements AccountManager {
     private GitkitClient mClient;
 
     /** The account containing the email address, list of personas, ... */
-    //private Account mAccount;
+    private UserProfile mAccount;
 
-    /** The account name for the currently active account. null to signify no account access. */
-    private String mAccountName;
-
-    /** The OAuth2 provider name for the currently active account. */
-    private String mAccountType;
-
-    /** The account avatar used in chats. */
-    private Object mAccountAvatar;
-
-    /** The account nickname used in chats. */
-    private String mAccountNickname;
+    /** The token obtained from the GIT. */
+    private IdToken mToken;
 
     // Public constructor
 
@@ -74,8 +73,13 @@ public class AccountManagerImpl implements AccountManager {
      *
      * @param bundle The parameter container.
      */
-    public AccountManagerImpl(final Bundle bundle) {
-        // Initialize using the given bundle.
+    public AccountManagerImpl(final Bundle bundle, final SharedPreferences preferences) {
+        // Initialize using the given bundle and determine if there are preferences to set up the account manager state.
+        //init(bundle);
+        if (preferences.contains(KEY_ACCOUNT_NAME)) {
+            // There are preferences.  Set up the account state, logging but otherwise ignoring errors.
+            buildProfileAndToken(preferences);
+        }
     }
 
     // Public instance methods
@@ -123,10 +127,11 @@ public class AccountManagerImpl implements AccountManager {
      *
      * @see com.pajato.android.gamechat.account.AccountManager#handleSigninResult(int, int, Intent)
      */
-    @Override public void handleSigninSuccess(final IdToken idToken, GitkitUser user) {
-        // TODO: figure out what to do here.
+    @Override public void handleSigninSuccess(final UserProfile profile, final IdToken idToken, final SharedPreferences preferences) {
+        // Store the given data in the current account.
+        setActive(profile, idToken, preferences);
         mClient = null;
-        Log.d(TAG, String.format("Handling a successful signin: token/user {%s/%s}.", idToken, user));
+        Log.d(TAG, String.format("Handling a successful signin: token/user {%s/%s}.", idToken.getTokenString(), profile));
     }
 
     /**
@@ -135,12 +140,13 @@ public class AccountManagerImpl implements AccountManager {
      * @see com.pajato.android.gamechat.account.AccountManager#hasAccount()
      */
     @Override public boolean hasAccount() {
-        Log.d(TAG, "No account exists yet.");
-        return false;
+        // The account is considered missing if neither the account nor the token has been loaded from the preference
+        // store, or if the token has expired.
+        return mAccount != null && mToken != null && !mToken.isExpired();
     }
 
     /**
-     * Override to implement.
+     * Override to implement the signin process using GIT.
      *
      * @see com.pajato.android.gamechat.account.AccountManager#signin(Activity)
      */
@@ -156,6 +162,53 @@ public class AccountManagerImpl implements AccountManager {
     }
 
     // Protected instance methods
+
+    /**
+     * Build the User GIT profile and token using preferences.
+     *
+     * @param preferences The given shared preferences object.
+     */
+    private void buildProfileAndToken(final SharedPreferences preferences) {
+        // Build a map of parameter values, ensuring that each is not null in order to proceed.
+        Map<String, String> data = new HashMap<>();
+        String[] keys = {KEY_ACCOUNT_NAME, KEY_ACCOUNT_DISPLAY_NAME, KEY_ACCOUNT_TYPE, KEY_ACCOUNT_URL, KEY_ACCOUNT_TOKEN};
+        for (String key : keys) {
+            String value = preferences.getString(key, null);
+            if (value == null) {
+                Log.w(TAG, String.format("Invalid null preference value for key {%s}.", key));
+                return;
+            }
+            Log.d(TAG, String.format("Capturing preference for key {%s} with value {%s}.", key, value));
+            data.put(key, value);
+        }
+
+        // Process the data to construct the account state.
+        IdProvider provider = IdProvider.valueOf(data.get(KEY_ACCOUNT_TYPE));
+        mAccount = new UserProfile(data.get(KEY_ACCOUNT_NAME), data.get(KEY_ACCOUNT_DISPLAY_NAME), data.get(KEY_ACCOUNT_URL), provider);
+        mToken = IdToken.parse(data.get(KEY_ACCOUNT_TOKEN));
+        Log.d(TAG, String.format("Account info: profile: {%s}; token: {%s}.", mAccount, mToken.getTokenString()));
+    }
+
+    /**
+     * Sets the given User GIT profile and token as the active account.  Also persists that account to the shared
+     * preferences store.
+     *
+     * @param profile The given GIT profile.
+     * @param token The given GIT token.
+     * @param preferences The given SharedPreferences store.
+     */
+    private void setActive(final UserProfile profile, final IdToken token, final SharedPreferences preferences) {
+        // Update the member variables and persist the relevant details to the preferences store.
+        mAccount = profile;
+        mToken = token;
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(KEY_ACCOUNT_NAME, profile.getEmail());
+        editor.putString(KEY_ACCOUNT_DISPLAY_NAME, profile.getDisplayName());
+        editor.putString(KEY_ACCOUNT_TYPE, profile.getIdProvider().name());
+        editor.putString(KEY_ACCOUNT_URL, profile.getPhotoUrl());
+        editor.putString(KEY_ACCOUNT_TOKEN, token.getTokenString());
+        editor.apply();
+    }
 
     // Private instance methods.
 
