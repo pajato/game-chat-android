@@ -54,9 +54,9 @@ dependencies {
     compile "com.android.support:recyclerview-v7:${rootProject.ext.supportLibraryVersion}"
     compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibraryVersion}"
     compile "com.android.support:design:${rootProject.ext.supportLibraryVersion}"
-    compile "com.google.android.gms:play-services-appindexing:${appIndexingVersion}"
-    compile 'com.google.android.gms:play-services:8.4.0'
-    compile 'com.facebook.android:facebook-android-sdk:4.8.1'
+    compile "com.google.android.gms:play-services-appindexing:${googlePlayServicesVersion}"
+    compile "com.google.android.gms:play-services:${googlePlayServicesVersion}"
+    compile "com.facebook.android:facebook-android-sdk:${facebookSdkVersion}"
     compile(name:'identitytoolkit-api10', ext:'aar')
     compile(name:'identitytoolkit_fbv4', ext:'jar')
 
